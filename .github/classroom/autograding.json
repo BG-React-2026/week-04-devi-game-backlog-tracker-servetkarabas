@@ -1,0 +1,74 @@
+{
+  "tests": [
+    {
+      "name": "Build Check",
+      "setup": "npm ci",
+      "run": "npm run build",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 5,
+      "points": 25
+    },
+    {
+      "name": "Lint Check",
+      "setup": "npm ci",
+      "run": "npm run lint",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 3,
+      "points": 15
+    },
+    {
+      "name": "TypeScript Check",
+      "setup": "npm ci",
+      "run": "npx tsc --noEmit",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 3,
+      "points": 15
+    },
+    {
+      "name": "Folder Structure",
+      "setup": "",
+      "run": "test -d src/api && test -d src/hooks && test -d src/layouts && test -d src/routes && test -d src/components && test -d src/pages && test -d src/types",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 1,
+      "points": 15
+    },
+    {
+      "name": "No useEffect for API calls",
+      "setup": "",
+      "run": "! grep -rE \"useEffect[^}]*?(fetch|axios)\" src/ 2>/dev/null",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 1,
+      "points": 10
+    },
+    {
+      "name": "React Query usage",
+      "setup": "",
+      "run": "grep -rq \"@tanstack/react-query\" src/",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 1,
+      "points": 10
+    },
+    {
+      "name": "json-server config",
+      "setup": "",
+      "run": "test -f db.json && grep -q \"json-server\" package.json",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 1,
+      "points": 10
+    }
+  ]
+}

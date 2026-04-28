@@ -1,0 +1,104 @@
+name: GitHub Classroom Workflow
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  checks: write
+  actions: read
+  contents: read
+
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Build Check
+        id: build-check
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Build Check
+          setup-command: npm ci
+          command: npm run build
+          timeout: 5
+          max-score: 25
+
+      - name: Lint Check
+        id: lint-check
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Lint Check
+          setup-command: npm ci
+          command: npm run lint
+          timeout: 3
+          max-score: 15
+
+      - name: TypeScript Check
+        id: typescript-check
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: TypeScript Check
+          setup-command: npm ci
+          command: npx tsc --noEmit
+          timeout: 3
+          max-score: 15
+
+      - name: Folder Structure
+        id: folder-structure
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Folder Structure
+          command: bash -c "test -d src/api && test -d src/hooks && test -d src/layouts && test -d src/routes && test -d src/components && test -d src/pages && test -d src/types"
+          timeout: 1
+          max-score: 15
+
+      - name: No useEffect for API calls
+        id: no-useeffect-api
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: No useEffect for API calls
+          command: bash -c "! grep -rE 'useEffect[^}]*?(fetch|axios)' src/ 2>/dev/null"
+          timeout: 1
+          max-score: 10
+
+      - name: React Query usage
+        id: react-query-usage
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: React Query usage
+          command: bash -c "grep -rq '@tanstack/react-query' src/"
+          timeout: 1
+          max-score: 10
+
+      - name: json-server config
+        id: json-server-config
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: json-server config
+          command: bash -c "test -f db.json && grep -q 'json-server' package.json"
+          timeout: 1
+          max-score: 10
+
+      - name: Autograding Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          BUILD-CHECK_RESULTS: "${{ steps.build-check.outputs.result }}"
+          LINT-CHECK_RESULTS: "${{ steps.lint-check.outputs.result }}"
+          TYPESCRIPT-CHECK_RESULTS: "${{ steps.typescript-check.outputs.result }}"
+          FOLDER-STRUCTURE_RESULTS: "${{ steps.folder-structure.outputs.result }}"
+          NO-USEEFFECT-API_RESULTS: "${{ steps.no-useeffect-api.outputs.result }}"
+          REACT-QUERY-USAGE_RESULTS: "${{ steps.react-query-usage.outputs.result }}"
+          JSON-SERVER-CONFIG_RESULTS: "${{ steps.json-server-config.outputs.result }}"
+        with:
+          runners: build-check,lint-check,typescript-check,folder-structure,no-useeffect-api,react-query-usage,json-server-config
